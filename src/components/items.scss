@@ -1,0 +1,59 @@
+@import "~animate.css";
+
+.v-application .title {
+  font-size: 0.8rem !important;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+/*.card {*/
+/*    width: 100%;*/
+/*    display: block;*/
+/*    !*align-items: center;*!*/
+/*    !*justify-content: space-between;*!*/
+/*    background: #03A9F4;*/
+/*    color: #FFFFFF;*/
+/*    border-radius: 10px;*/
+
+/*    & > div {*/
+/*        display: inline-block;*/
+/*    }*/
+
+/*    &.complete {*/
+/*        background: #81D4FA;*/
+/*        !*color: #B388FF;*!*/
+/*    }*/
+
+/*    .title {*/
+/*        float: left;*/
+/*        max-width: 50%;*/
+/*        align-items: center;*/
+/*        justify-content: space-between;*/
+
+/*        & > * {*/
+/*            display: inline-block;*/
+/*        }*/
+/*    }*/
+
+/*    .text {*/
+/*        min-width: 100px;*/
+/*        max-width: calc(50% - 50px);*/
+/*        text-align: center;*/
+
+/*        & > * {*/
+/*            display: flex;*/
+/*            !*display: inline-block;*!*/
+/*        }*/
+/*    }*/
+
+/*    .edit {*/
+/*        float: right;*/
+/*        width: 50px;*/
+/*    }*/
+/*}*/

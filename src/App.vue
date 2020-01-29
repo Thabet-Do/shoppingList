@@ -1,32 +1,111 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+    <div id="app">
+        <v-app id="inspire">
+            <v-navigation-drawer v-model="drawer" app clipped>
+                <v-list dense>
+                    <v-list-item to="/">
+                        <v-list-item-action>
+                            <v-icon>fa-server</v-icon>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                            <v-list-item-title>Order Lists</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item to="/speed">
+                        <v-list-item-action>
+                            <v-icon>fa-fire</v-icon>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                            <v-list-item-title>Speed</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item to="/edit">
+                        <v-list-item-action>
+                            <v-icon>fa-edit</v-icon>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                            <v-list-item-title>Edit Orders</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item to="/about">
+                        <v-list-item-action>
+                            <v-icon>fa-user-friends</v-icon>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                            <v-list-item-title>About Us</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                </v-list>
+            </v-navigation-drawer>
+
+            <v-app-bar app clipped-left>
+                <v-app-bar-nav-icon class="font-weight-bold" @click.stop="drawer = !drawer"/>
+                <v-toolbar-title class="site-logo">Shopping<span>List</span></v-toolbar-title>
+            </v-app-bar>
+
+            <v-content>
+                <v-container>
+                    <v-layout align-left justify-start>
+                        <router-view/>
+                    </v-layout>
+                </v-container>
+            </v-content>
+
+<!--            <v-footer app>-->
+<!--                <span>&copy; 2019 All Right Receded ShoppingList.com</span>-->
+<!--            </v-footer>-->
+        </v-app>
     </div>
-    <router-view/>
-  </div>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+    export default {
+        name: 'App',
+        data: () => ({
+            drawer: 0
+        }),
+    };
+</script>
 
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
+<style>
+    .w-25 {
+        width: 25% !important;
     }
-  }
-}
+
+    .w-50 {
+        width: 50% !important;
+    }
+
+    .w-75 {
+        width: 75% !important;
+    }
+
+    .w-100 {
+        width: 100% !important;
+    }
+
+    main {
+        background-color: #E1F5FE
+    }
+</style>
+<style scoped>
+    .v-app-bar__nav-icon i:before {
+        font-weight: bold;
+    }
+
+    .site-logo {
+        background-color: transparent;
+        color: #0a6c7a;
+        font-weight: 900 !important;
+        font-size: 1.7rem !important;
+        font-family: "Baloo Bhaijaan", "Roboto", sans-serif;
+    }
+
+    .site-logo span {
+        color: #F44336;
+    }
+
+    .home {
+        width: 100%;
+    }
 </style>
