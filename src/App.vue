@@ -40,7 +40,7 @@
 
             <v-app-bar app clipped-left>
                 <v-app-bar-nav-icon class="font-weight-bold" @click.stop="drawer = !drawer"/>
-                <v-toolbar-title class="site-logo">Shopping<span>List</span></v-toolbar-title>
+                <v-toolbar-title class="site-logo">Home<span>List</span></v-toolbar-title>
             </v-app-bar>
 
             <v-content>
@@ -52,7 +52,7 @@
             </v-content>
 
 <!--            <v-footer app>-->
-<!--                <span>&copy; 2019 All Right Receded ShoppingList.com</span>-->
+<!--                <span>&copy; 2019 All Right Receded HomeList.com</span>-->
 <!--            </v-footer>-->
         </v-app>
     </div>

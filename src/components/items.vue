@@ -4,7 +4,7 @@
         <v-tooltip top>
             <template v-slot:activator="{ on }">
                 <v-btn
-                        :color="searchShow ? myColor.main : 'dark' "
+                        :color="!searchShow ? myColor.main : `${myColor.main} accent-2` "
                         @click="searchShow = !searchShow"
                         class="mt-2 mr-2" dark small
                         v-on="on">
@@ -18,9 +18,9 @@
         <v-tooltip top>
             <template v-slot:activator="{ on }">
                 <v-btn
-                        :color="expand ? myColor.main : 'dark'"
+                        :color="!expand ? myColor.deepPurple +' darken-1' : `${myColor.main} accent-2`"
                         @click="expand = !expand"
-                        class="mt-2 mr-2" dark small
+                        class="mt-2 mr-2" small
                         v-on="on">
                     <v-icon :color="myColor.theme" small>fa-expand-arrows-alt</v-icon>
                 </v-btn>
@@ -32,14 +32,14 @@
         <v-tooltip top>
             <template v-slot:activator="{ on }">
                 <v-btn
-                        :color="filter.complete ? 'green' : 'dark' "
+                        :color="filter.complete ? myColor.green : myColor.dark "
                         @click="filter.complete = !filter.complete"
                         class="mt-2 mr-2" dark small
                         v-on="on">
                     <v-icon :color="myColor.theme" small>fa-check</v-icon>
                 </v-btn>
             </template>
-            <span>Is Complete</span>
+            <span>{{ filter.complete ? 'Show Uncompleted' : 'Hide Uncompleted'}}</span>
         </v-tooltip>
 
         <!--Add Item-->
@@ -60,23 +60,29 @@
                 <v-card-text>
                     <v-row>
                         <v-col cols="12">
-                            <v-text-field :rules="rules" dense hide-details="auto" label="Name" outlined/>
+                            <v-text-field dense hide-details="auto" label="Name" outlined
+                                          v-model="newItem.name"/>
                         </v-col>
                         <v-col cols="12">
-                            <v-text-field :rules="rules" dense hide-details="auto" label="Quantity" outlined/>
+                            <v-text-field dense hide-details="auto" label="Quantity"
+                                          outlined v-model="newItem.quantity"/>
                         </v-col>
                         <v-col cols="6" v-show="dialogAddItem.simple">
-                            <v-text-field :rules="rules" dense hide-details="auto" label="Unit" outlined/>
+                            <v-text-field dense hide-details="auto" label="Unit" outlined
+                                          v-model="newItem.unit"/>
                         </v-col>
                         <v-col cols="6" v-show="dialogAddItem.simple">
-                            <v-select :items="['On','Off']" :rules="rules" dense hide-details="auto" label="importance"
-                                      outlined value="Off"/>
+                            <v-select :items="['On','Off']" dense hide-details="auto"
+                                      label="importance" outlined
+                                      v-model="newItem.importance" value="Off"/>
                         </v-col>
                         <v-col cols="12" v-show="dialogAddItem.simple">
-                            <v-text-field :rules="rules" dense hide-details="auto" label="Price" outlined/>
+                            <v-text-field dense hide-details="auto" label="Price" outlined
+                                          v-model="newItem.price"/>
                         </v-col>
                         <v-col cols="12">
-                            <v-textarea :rules="rules" dense hide-details="auto" label="Description" outlined rows="2"/>
+                            <v-textarea dense hide-details="auto" label="Description"
+                                        outlined rows="2" v-model="newItem.description"/>
                         </v-col>
                     </v-row>
                 </v-card-text>
@@ -98,6 +104,61 @@
             </v-card>
         </v-dialog>
 
+        <!--More Option-->
+        <v-tooltip top>
+            <template v-slot:activator="{ on }">
+                <v-btn
+                        :color="!moreOption ? 'blue-grey' : 'indigo accent-2'"
+                        @click="moreOption = !moreOption"
+                        class="mt-2 mr-2" dark small
+                        v-on="on">
+                    <v-icon :color="myColor.theme" small>{{moreOption ? 'fa-chevron-left' : 'fa-chevron-right'}}
+                    </v-icon>
+                </v-btn>
+            </template>
+            <span>{{moreOption ? 'Less Option' : 'More Option'}}</span>
+        </v-tooltip>
+
+        <!--Show Importance-->
+        <v-tooltip top v-show="moreOption">
+            <template v-slot:activator="{ on }">
+                <v-btn
+                        :color="!filter.importance ? 'indigo accent-2' : 'red'"
+                        @click="filter.importance = ! filter.importance"
+                        class="mt-2 mr-2"
+                        dark small v-on="on"
+                        v-show="moreOption">
+                    <v-icon :color="myColor.theme" small>fa-fire</v-icon>
+                </v-btn>
+            </template>
+            <span>{{ filter.importance ? 'Hide Importance' : 'Show Importance'}}</span>
+        </v-tooltip>
+
+        <!--Filter By Date-->
+        <v-menu
+                :close-on-content-click="false"
+                offset-y
+                ref="filter.date.menu"
+                transition="scale-transition"
+                v-model="filter.date.menu">
+            <template v-slot:activator="{ on }">
+                <v-btn
+                        class="mt-2 mr-2"
+                        color="indigo accent-2"
+                        dark small v-on="on"
+                        v-show="moreOption">
+                    <v-icon :color="myColor.theme" small>fa-calendar-alt</v-icon>
+                </v-btn>
+            </template>
+            <v-date-picker no-title range v-model="filter.date.dates">
+                <v-spacer/>
+                <v-btn :color="filter.date.cond ? 'green' : 'primary'" @click="filter.date.cond = !filter.date.cond"
+                       outlined text>Active
+                </v-btn>
+                <v-btn @click="filter.date.menu = false" color="primary" text>OK</v-btn>
+            </v-date-picker>
+        </v-menu>
+
         <!--Search By Name Input-->
         <v-text-field :class="searchShow ? 'fadeInRight' : 'fadeOutRight d-none'" class="mt-2 animated fast" dense
                       hide-details placeholder="Search"
@@ -108,12 +169,10 @@
                 :key="item.date"
                 class="mx-auto my-3" outlined
                 v-for="item in filteredItems">
-
             <v-row class="px-2 ma-0" justify="space-between">
                 <v-col class="py-2">
                     <v-card-title class="pa-0">
-                        <v-avatar :color="item.importance ? 'pink' : 'indigo'" class="mx-2" size="17"/>
-
+                        <v-avatar :color="item.importance ? myColor.pink : myColor.main" class="mx-2" size="17"/>
                         {{item.name}}:
                         <transition name="fade">
                             <span style="font-weight: normal; font-size: 1rem" v-show="!expand"> {{item.quantity + item.unit}}</span>
@@ -126,7 +185,7 @@
                         <v-icon :color="myColor.theme" small>fa-edit</v-icon>
                     </v-btn>
                     <v-btn
-                            :color="item.complete ? 'green' : 'dark' "
+                            :color="item.complete ? myColor.green : myColor.dark "
                             @click="[item.complete = !item.complete, sendCompleteStatus(item.id, item.complete)]"
                             class="ml-1" dark
                             small>
@@ -173,11 +232,26 @@
                 dialog: false,
                 simple: false
             },
+            moreOption: false,
+            newItem: {
+                // id , complete , dateCreate , dateModify || Generate by DB
+                companyId: '',
+                name: '',
+                quantity: '',
+                unit: '',
+                importance: 'On',
+                price: '',
+                description: ''
+            },
             searchShow: 0,
             myColor: {
                 main: 'indigo',
                 theme: "white",
-                second: "grey"
+                second: "grey",
+                green: 'green',
+                dark: 'dark',
+                deepPurple: 'deep-purple',
+                pink: 'pink',
             },
             expand: false,
             items: [
@@ -187,8 +261,8 @@
                     quantity: "12",
                     unit: "Kg",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2020/2/15",
                     description: "XXXX",
                     complete: true,
                     importance: true,
@@ -198,8 +272,8 @@
                     name: "Banana",
                     quantity: "12",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: true,
                 },
@@ -209,8 +283,8 @@
                     quantity: "12",
                     unit: "",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                     importance: true,
@@ -221,8 +295,8 @@
                     quantity: "2",
                     unit: "lit",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: true,
                     importance: true,
@@ -233,8 +307,8 @@
                     quantity: "12",
                     unit: "Kg",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -243,8 +317,8 @@
                     name: "Table",
                     quantity: "1",
                     price: "15000",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: true,
                 },
@@ -254,8 +328,8 @@
                     quantity: "12",
                     unit: "Kg",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -264,8 +338,8 @@
                     name: "Banana",
                     quantity: "12",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: true,
                 },
@@ -275,8 +349,8 @@
                     quantity: "12",
                     unit: "",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -286,8 +360,8 @@
                     quantity: "2",
                     unit: "lit",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: true,
                 },
@@ -297,8 +371,8 @@
                     quantity: "12",
                     unit: "Kg",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -307,8 +381,8 @@
                     name: "Table",
                     quantity: "1",
                     price: "15000",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -318,8 +392,8 @@
                     quantity: "12",
                     unit: "Kg",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -328,8 +402,8 @@
                     name: "Banana",
                     quantity: "12",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -339,8 +413,8 @@
                     quantity: "12",
                     unit: "",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -350,8 +424,8 @@
                     quantity: "2",
                     unit: "lit",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -361,8 +435,8 @@
                     quantity: "12",
                     unit: "Kg",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -371,8 +445,8 @@
                     name: "Table",
                     quantity: "1",
                     price: "15000",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2020-2-10",
                     description: "XXXX",
                     complete: false,
                 },
@@ -382,8 +456,8 @@
                     quantity: "12",
                     unit: "Kg",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -392,8 +466,8 @@
                     name: "Banana",
                     quantity: "12",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: false,
                 },
@@ -403,8 +477,8 @@
                     quantity: "12",
                     unit: "",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: true,
                 },
@@ -414,8 +488,8 @@
                     quantity: "2",
                     unit: "lit",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: true,
                 },
@@ -425,8 +499,8 @@
                     quantity: "12",
                     unit: "Kg",
                     price: "1500",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: true,
                 },
@@ -435,21 +509,27 @@
                     name: "Table",
                     quantity: "1",
                     price: "15000",
-                    dateCreate: "2019/20/1",
-                    dateModify: "2019/20/1",
+                    dateCreate: "2019/2/1",
+                    dateModify: "2019/2/1",
                     description: "XXXX",
                     complete: true,
                 },
             ],
             filter: {
                 name: '', /* All case --- false --- contain "name" */
-                date: false, /*All case --- false --- range: "2020/1/20 - 2020/1/23" --- this day --- this month*/
-                complete: {
-                    active: false,
-                    condition: true
-                }, /*All case --- false --- true*/
+                date: {
+                    menu: false,
+                    dates: ['', ''],
+                    /*
+                    moment().subtract(2, 'days').format('YYYY-MM-DD'),
+                    moment().format('YYYY-MM-DD')
+                    */
+                    cond: false /*All case --- false --- range: "2020/1/20 - 2020/1/23" --- this day --- this month*/
+                },
+                complete: true, /*All case --- false --- true*/
                 price: false, /*"<55"*/ /* All Case --- false = without filter price --- less than x '<x' --- More than x '>x' --- equal x '=x' */
                 quantity: false, /*"<5000"*/ /* All Case --- false = without filter price --- less than x '<x' --- More than x '>x' --- equal x '=x' */
+                importance: false,
             }
         }),
         methods: {
@@ -464,6 +544,10 @@
                 if (f.complete) {
                     items = items.filter(item => item.complete);
                     console.log("Done Filter Complete");
+                }
+                if (f.importance) {
+                    items = items.filter(item => item.importance);
+                    console.log("Done Filter Importance");
                 }
                 if (f.quantity) {
                     const
@@ -493,20 +577,56 @@
                     items = items.filter(i => i.name.includes(f.name));
                     console.log("Done Filter Name");
                 }
-                if (f.date) {
-                    const
-                        date = f.date.split("-"),
-                        startDate = date[0],
-                        endDate = date[1];
-                    console.log(startDate, endDate);
+                if (f.date.cond) {
+                    let
+                        date = f.date.dates,
+                        startDate = new Date(date[0]).getTime(),
+                        endDate = new Date(date[1]).getTime();
+                    if (startDate > endDate) {
+                        let tmp = endDate;
+                        endDate = startDate;
+                        startDate = tmp;
+                        console.log('SSSSSSSSSSSSSSSSSSSSSSSSSSSS')
+                    }
+
+                    console.log(startDate, " XXX ", endDate);
+                    console.log(new Date("2020-2-15").getTime());
+                    console.log(startDate, " XXX ", endDate);
+                    try {
+                        if (startDate === endDate) {
+                            items = items.filter(
+                                i => startDate === new Date(i.dateModify).getTime()
+                            );
+                        } else {
+                            items = items.filter(
+                                i =>
+                                    startDate <= new Date(i.dateModify).getTime()
+                                    &&
+                                    new Date(i.dateModify).getTime() <= endDate
+                            );
+                        }
+                    } catch (e) {
+                        console.log(e)
+                    }
                     console.log("Done filter Date");
                 }
                 return items
-            }
+            },
+            // eslint-disable-next-line vue/return-in-computed-property
+            dateRangeText: function () {
+                if (new Date(this.filter.date.dates[0]) > new Date(this.filter.date.dates[0])) {
+                    const tmp = this.filter.date.dates[0];
+                    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+                    this.filter.date.dates[0] = this.filter.date.dates[1];
+                    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+                    this.filter.date.dates[1] = tmp;
+                }
+                return this.filter.date.dates.join(' ~ ')
+            },
         }
     }
 </script>
 
 <style lang="scss" scoped>
-    @import "items";
+    @import "items.scss";
 </style>
