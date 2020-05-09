@@ -7,29 +7,29 @@ import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@mdi/font/css/materialdesignicons.css'
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 new Vue({
-  router,
-  store,
-  vuetify,
-  render: h => h(App)
-}).$mount('#app')
+    router,
+    store,
+    vuetify,
+    render: h => h(App)
+}).$mount('#app');
 
-/*
+/*const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database Name
+const dbName = 'test';
+// Create a new MongoClient
+const client = new MongoClient(url);
+// Use connect method to connect to the Server
+client.connect(function (err) {
+    assert.equal(null, err);
+    console.log("Connected successfully to server");
 
-
-const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://sabeat:sabaet5445894@cluster0-e2yzj.gcp.mongodb.net/test?retryWrites=true&w=majority";
-const client = new MongoClient(uri, {useNewUrlParser: true});
-client.connect(err => {
-  if (err) throw err;
-  const collection = client.db("test").collection("devices");
-  // perform actions on the collection object
-  console.log(collection);
-  client.close();
-});
-
-
-
-*/
+    const db = client.db(dbName);
+    // Insert a single document
+    db.collection('inserts').insertMany([{a: 1}, {a: 4}, {a: 3}, {a: 2}])
+};*/

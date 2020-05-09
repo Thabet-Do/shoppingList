@@ -11,22 +11,6 @@
                             <v-list-item-title>Order Lists</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item to="/speed">
-                        <v-list-item-action>
-                            <v-icon>fa-fire</v-icon>
-                        </v-list-item-action>
-                        <v-list-item-content>
-                            <v-list-item-title>Speed</v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item to="/edit">
-                        <v-list-item-action>
-                            <v-icon>fa-edit</v-icon>
-                        </v-list-item-action>
-                        <v-list-item-content>
-                            <v-list-item-title>Edit Orders</v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
                     <v-list-item to="/about">
                         <v-list-item-action>
                             <v-icon>fa-user-friends</v-icon>

@@ -97,7 +97,59 @@
                         Close
                     </v-btn>
 
-                    <v-btn @click="dialogAddItem.dialog = false" color="green darken-1" text>
+                    <v-btn @click="addNewItem()" color="green darken-1" text>
+                        Save
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+
+        <!-- Edit Item Dialog -->
+        <v-dialog v-model="dialogEditItem.dialog">
+            <v-card>
+                <v-card-title class="headline">Edit Order:</v-card-title>
+                <v-card-text>
+                    <v-row>
+                        <v-col cols="12">
+                            <v-text-field dense hide-details="auto" label="Name" outlined
+                                          v-model="editItem.name"/>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-text-field dense hide-details="auto" label="Quantity"
+                                          outlined v-model="editItem.quantity"/>
+                        </v-col>
+                        <v-col cols="6" v-show="dialogEditItem.simple">
+                            <v-text-field dense hide-details="auto" label="Unit" outlined
+                                          v-model="editItem.unit"/>
+                        </v-col>
+                        <v-col cols="6" v-show="dialogEditItem.simple">
+                            <v-select :items="['On','Off']" dense hide-details="auto"
+                                      label="importance" outlined
+                                      v-model="editItem.importance" value="Off"/>
+                        </v-col>
+                        <v-col cols="12" v-show="dialogEditItem.simple">
+                            <v-text-field dense hide-details="auto" label="Price" outlined
+                                          v-model="editItem.price"/>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-textarea dense hide-details="auto" label="Description"
+                                        outlined rows="2" v-model="editItem.description"/>
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+
+                <v-card-actions>
+                    <v-btn @click="dialogEditItem.simple = !dialogEditItem.simple" class="mx-2" color="green darken-1"
+                           text>
+                        {{dialogEditItem.simple ? 'Simple' : 'Advance'}}
+                    </v-btn>
+                    <v-spacer/>
+                    <v-btn @click="dialogEditItem.dialog = false" color="green darken-1" text>
+                        Close
+                    </v-btn>
+
+                    <v-btn @click="updateItem()" color="green darken-1" text>
                         Save
                     </v-btn>
                 </v-card-actions>
@@ -172,7 +224,10 @@
             <v-row class="px-2 ma-0" justify="space-between">
                 <v-col class="py-2">
                     <v-card-title class="pa-0">
-                        <v-avatar :color="item.importance ? myColor.pink : myColor.main" class="mx-2" size="17"/>
+                        <v-avatar
+                                :color="item.importance ? myColor.pink : myColor.main"
+                                @click="[item.importance = !item.importance, sendImportanceStatus(item._id, item.importance)]"
+                                class="mx-2 mouse-pointer" size="17"/>
                         {{item.name}}:
                         <transition name="fade">
                             <span style="font-weight: normal; font-size: 1rem" v-show="!expand"> {{item.quantity + item.unit}}</span>
@@ -181,12 +236,12 @@
                 </v-col>
 
                 <div class="my-auto">
-                    <v-btn :color="myColor.main" small value="1">
+                    <v-btn :color="myColor.main" @click="editItemFill(item)" small value="1">
                         <v-icon :color="myColor.theme" small>fa-edit</v-icon>
                     </v-btn>
                     <v-btn
                             :color="item.complete ? myColor.green : myColor.dark "
-                            @click="[item.complete = !item.complete, sendCompleteStatus(item.id, item.complete)]"
+                            @click="[item.complete = !item.complete, sendCompleteStatus(item._id, item.complete)]"
                             class="ml-1" dark
                             small>
                         <v-icon :color="myColor.theme" small>fa-check</v-icon>
@@ -211,9 +266,9 @@
                 <v-sheet :color="`${myColor.second} lighten-3`" class="text-center" tile v-show="expand">
                     <v-row dense>
                         <v-col class="pa-0 title grey--text font-weight-regular text--darken-2"
-                               v-text="`modified: ${item.dateModify}`"/>
+                               v-text="`Modified: ${getFormatDate(item.dateModify)}`"/>
                         <v-col class="pa-0 title grey--text font-weight-regular text--darken-2"
-                               v-text="`Created: ${item.dateCreate}`"/>
+                               v-text="`Created: ${getFormatDate(item.dateCreate)}`"/>
                     </v-row>
                 </v-sheet>
             </transition>
@@ -225,12 +280,21 @@
     import moment from "moment";
 
     moment.locale('ar-kw');
+
+    const
+        axios = require('axios'),
+        postsURL = "http://localhost:5000/api/posts/";
+
     export default {
         name: "items",
         data: () => ({
+            dialogEditItem: {
+                "dialog": false,
+                "simple": true
+            },
             dialogAddItem: {
-                dialog: false,
-                simple: false
+                "dialog": false,
+                "simple": false
             },
             moreOption: false,
             newItem: {
@@ -243,29 +307,39 @@
                 price: '',
                 description: ''
             },
+            editItem: {
+                "_id": "",
+                "companyId": '',
+                "name": '',
+                "quantity": '',
+                "unit": '',
+                "importance": 'On',
+                "price": '',
+                "description": ''
+            },
             searchShow: 0,
             myColor: {
-                main: 'indigo',
+                main: "indigo",
                 theme: "white",
                 second: "grey",
-                green: 'green',
-                dark: 'dark',
-                deepPurple: 'deep-purple',
-                pink: 'pink',
+                green: "green",
+                dark: "dark",
+                deepPurple: "deep-purple",
+                pink: "pink",
             },
             expand: false,
             items: [
                 {
-                    id: 1,
-                    name: "Tomato",
-                    quantity: "12",
-                    unit: "Kg",
-                    price: "1500",
-                    dateCreate: "2019/2/1",
-                    dateModify: "2020/2/15",
-                    description: "XXXX",
-                    complete: true,
-                    importance: true,
+                    "id": 1,
+                    "name": "Tomato",
+                    "quantity": "12",
+                    "unit": "Kg",
+                    "price": "1500",
+                    "dateCreate": "2019/2/1",
+                    "dateModify": "2020/2/15",
+                    "description": "XXXX",
+                    "complete": true,
+                    "importance": true,
                 },
                 {
                     id: 2,
@@ -533,9 +607,114 @@
             }
         }),
         methods: {
-            sendCompleteStatus: function (id, complete) {
-                console.log("Complete State is Changed ID:", id, complete)
-            }
+            getFormatDate(date) {
+                return moment(date).fromNow();
+            },
+            sendCompleteStatus(itemID, complete) {
+                axios({
+                    method: "PUT",
+                    url: postsURL,
+                    data: {
+                        "id": itemID,
+                        "user_id": this.user_id,
+                        "update": {
+                            "complete": complete,
+                        },
+                    }
+                });
+            },
+            sendImportanceStatus(itemID, importance) {
+                axios({
+                    method: "PUT",
+                    url: postsURL,
+                    data: {
+                        "id": itemID,
+                        "user_id": this.user_id,
+                        "update": {
+                            "importance": importance,
+                        },
+                    }
+                });
+            },
+            addNewItem() {
+                this.dialogAddItem.dialog = false;
+                //Create New Item
+                axios({
+                    method: "POST",
+                    url: postsURL,
+                    data: {
+                        "name": this.newItem.name,
+                        "quantity": this.newItem.quantity,
+                        "unit": this.newItem.unit,
+                        "price": this.newItem.price,
+                        "description": this.newItem.description,
+                        "complete": true,
+                        "importance": this.newItem.importance,
+                        "company_id": this.company_id,
+                        "user_id": this.user_id
+                    }
+                })
+                    .then(() => {
+                        this.getItems();
+                        this.newItem = {
+                            companyId: '',
+                            name: '',
+                            quantity: '',
+                            unit: '',
+                            importance: 'On',
+                            price: '',
+                            description: ''
+                        };
+                    });
+            },
+            getItems() {
+                axios.get(postsURL + this.company_id).then((res) => this.items = res.data);
+            },
+            editItemFill(item) {
+                this.dialogEditItem.dialog = true;
+                this.editItem._id = item._id;
+                this.editItem.companyId = item.companyId;
+                this.editItem.name = item.name;
+                this.editItem.quantity = item.quantity;
+                this.editItem.unit = item.unit;
+                this.editItem.importance = item.importance ? "On" : "Off";
+                this.editItem.price = item.price;
+                this.editItem.description = item.description;
+            },
+            updateItem() {
+                this.dialogEditItem.dialog = false;
+                //Create New Item
+                axios({
+                    method: "PUT",
+                    url: postsURL,
+                    data: {
+                        "id": this.editItem._id,
+                        "user_id": this.user_id,
+                        "update": {
+                            "name": this.editItem.name,
+                            "quantity": this.editItem.quantity,
+                            "unit": this.editItem.unit,
+                            "price": this.editItem.price,
+                            "description": this.editItem.description,
+                            "complete": true,
+                            "importance": this.editItem.importance === "On",
+                        },
+                    }
+                })
+                    .then(() => {
+                        this.getItems();
+                        this.editItem = {
+                            "_id": "",
+                            "companyId": '',
+                            "name": '',
+                            "quantity": '',
+                            "unit": '',
+                            "importance": 'On',
+                            "price": '',
+                            "description": ''
+                        };
+                    });
+            },
         },
         computed: {
             filteredItems: function () {
@@ -623,6 +802,11 @@
                 }
                 return this.filter.date.dates.join(' ~ ')
             },
+        },
+        beforeCreate() {
+            this.company_id = "5eb272f55ace9c3c18b969ca";
+            this.user_id = "5eb272555ace9c3c18b969c9";
+            axios.get(postsURL + this.company_id).then((res) => this.items = res.data);
         }
     }
 </script>
